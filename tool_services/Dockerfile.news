@@ -1,0 +1,34 @@
+# tool_services/Dockerfile.search
+# Base Dockerfile for Search Service
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install OS dependencies if any service needs them (none needed for search)
+# RUN apt-get update && apt-get install -y --no-install-recommends some-package && rm -rf /var/lib/apt/lists/*
+
+COPY ./requirements.txt /app/requirements.txt
+
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy shared utils if they exist
+# COPY ./utils /app/utils
+# COPY ./utils/__init__.py /app/utils/__init__.py
+
+# Copy the common __init__.py for the tool_services package
+COPY ./tool_services/__init__.py /app/tool_services/
+
+# Copy the specific service code
+COPY ./tool_services/search_service.py /app/tool_services/
+
+# Copy the .env file
+COPY ./.env /app/.env
+
+# Expose the port (will be mapped in docker-compose)
+EXPOSE 8001
+
+# The actual command will be overridden by docker-compose.yml
+# Add a default CMD in case run directly (optional)
+# CMD ["uvicorn", "tool_services.search_service:app", "--host", "0.0.0.0", "--port", "8001"]

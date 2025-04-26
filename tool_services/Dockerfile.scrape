@@ -1,0 +1,29 @@
+# tool_services/Dockerfile.scrape
+# Use official Playwright image (includes browsers and OS dependencies)
+FROM mcr.microsoft.com/playwright/python:v1.44.0-jammy
+
+WORKDIR /app
+
+# Copy requirements and install Python dependencies
+COPY ./requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Browsers are included in the base image - no 'playwright install' needed here
+
+# Copy shared utils if they exist
+# COPY ./utils /app/utils
+# COPY ./utils/__init__.py /app/utils/__init__.py
+COPY ./tool_services/__init__.py /app/tool_services/
+
+# Copy the specific service code
+COPY ./tool_services/scrape_service.py /app/tool_services/
+
+# Copy the .env file
+COPY ./.env /app/.env
+
+# Expose the port
+EXPOSE 8002
+
+# Command to run the service (will be overridden by compose)
+# CMD ["uvicorn", "tool_services.scrape_service:app", "--host", "0.0.0.0", "--port", "8002"]

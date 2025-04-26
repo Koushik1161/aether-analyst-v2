@@ -1,0 +1,112 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant_db
+    ports:
+      - "6333:6333" # REST API
+      - "6334:6334" # gRPC
+    volumes:
+      - qdrant_storage:/qdrant/storage # Use named volume for persistence
+    restart: always # Optional: restart Qdrant if it stops
+
+  search_service:
+    build:
+      context: .
+      dockerfile: tool_services/Dockerfile.search # Specify the Dockerfile
+    container_name: search_service
+    ports:
+      - "8001:8001"
+    env_file: .env # Read variables from .env file
+    restart: unless-stopped # Optional: restart policy
+
+  scrape_service:
+    build:
+      context: .
+      dockerfile: tool_services/Dockerfile.scrape
+    container_name: scrape_service
+    ports:
+      - "8002:8002"
+    ipc: host # Often needed for Playwright/Chromium in Docker
+    env_file: .env
+    restart: unless-stopped
+
+  analyze_service:
+    build:
+      context: .
+      dockerfile: tool_services/Dockerfile.analyze # Use the copied Dockerfile
+    container_name: analyze_service
+    ports:
+      - "8003:8003"
+    env_file: .env
+    restart: unless-stopped
+
+  news_service:
+    build:
+      context: .
+      dockerfile: tool_services/Dockerfile.news # Use the copied Dockerfile
+    container_name: news_service
+    ports:
+      - "8004:8004"
+    env_file: .env
+    restart: unless-stopped
+
+  processing_service:
+    build:
+      context: .
+      dockerfile: tool_services/Dockerfile.process
+    container_name: processing_service
+    ports:
+      - "8005:8005"
+    volumes: # Mount cache to speed up subsequent runs if models download on start
+      - ./.cache/huggingface:/app/.cache/huggingface
+      - ./.cache/sentence_transformers:/app/.cache/sentence_transformers
+    env_file: .env
+    environment:
+      # Override QDRANT_URL to use service name within Docker network
+      QDRANT_URL: http://qdrant:6333
+    depends_on:
+      qdrant: # Ensure Qdrant service is started (doesn't guarantee readiness)
+         condition: service_started # Basic check
+    restart: unless-stopped
+
+  webapp: # Orchestrator + UI
+    build:
+      context: .
+      dockerfile: Dockerfile # Use the Dockerfile in the root
+    container_name: webapp_ui
+    ports:
+      - "8501:8501"
+    env_file: .env
+    volumes: # Mount cache for embedding model loading in orchestrator
+      - ./.cache/huggingface:/app/.cache/huggingface
+      - ./.cache/sentence_transformers:/app/.cache/sentence_transformers
+    environment:
+      # Override URLs to use service names for inter-container communication
+      TOOL_SEARCH_URL: http://search_service:8001
+      TOOL_SCRAPE_URL: http://scrape_service:8002
+      TOOL_ANALYZE_URL: http://analyze_service:8003
+      TOOL_NEWS_URL: http://news_service:8004
+      TOOL_PROCESS_URL: http://processing_service:8005
+      QDRANT_URL: http://qdrant:6333
+      # Make sure Streamlit runs on correct host inside container
+      STREAMLIT_SERVER_ADDRESS: 0.0.0.0
+      STREAMLIT_SERVER_PORT: 8501
+    depends_on: # Basic dependency check, doesn't guarantee services are fully ready
+       search_service:
+         condition: service_started
+       scrape_service:
+         condition: service_started
+       analyze_service:
+         condition: service_started
+       news_service:
+         condition: service_started
+       processing_service:
+         condition: service_started
+    restart: unless-stopped
+
+volumes:
+  qdrant_storage: # Define the named volume used by Qdrant service
+    driver: local # Explicitly define driver (optional)

@@ -1,0 +1,62 @@
+# requirements.txt - Aether Analyst v2
+
+streamlit==1.44.1
+# --- Core Orchestration ---
+langchain>=0.2.0 # Includes langchain-core, langchain-community, etc.
+langgraph>=0.1.0
+langchain-openai>=0.1.0 # For OpenAI models
+
+# --- Tool Microservices ---
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0 # ASGI Server with standard extras
+httpx>=0.27.0 # For async HTTP calls (LangGraph to tools)
+pydantic>=2.0.0 # Schema definition/validation
+
+# --- Web Scraping Tool ---
+playwright>=1.42.0
+beautifulsoup4>=4.12.0 # Still useful for parsing HTML from Playwright
+# playwright-stealth # (Install later if needed)
+# python-proxy # (Install later if needed for proxy management)
+
+# --- RAG Pipeline ---
+# Vector Database Client (Choose one or install later)
+qdrant-client>=1.7.0
+# chromadb>=0.4.22 # Alternative
+# weaviate-client>=4.4.0 # Alternative
+# Pinecone client if using managed service
+
+# Embedding Models (Install based on choice)
+sentence-transformers>=2.6.0 # For loading many open-source models
+# openai # Already included for LLM
+# voyageai # If using Voyage embeddings
+# cohere # If using Cohere embeddings/rerank
+
+# Chunking / Text Splitters (Part of LangChain)
+
+# Rerankers (Optional - Install based on choice)
+# cohere # If using Cohere rerank
+# FlagEmbedding # If using BGE reranker (might be via sentence-transformers)
+
+# --- News Tool ---
+# newsapi-python # Or use httpx directly
+
+# --- Analysis Tool ---
+# Grok API (use httpx/requests, no specific SDK needed for now)
+requests>=2.31.0
+
+# --- Deployment & Dev ---
+python-dotenv>=1.0.0 # Load .env files
+docker # (Install Docker Desktop/Engine separately)
+
+# --- Testing ---
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+
+# --- Utilities ---
+# Add any other utility libraries here
+# (Add these lines to your existing requirements.txt)
+
+# --- RAG Pipeline ---
+qdrant-client>=1.9.0 # Updated version if available
+sentence-transformers>=2.7.0 # For embedding models
+langchain-text-splitters # Explicitly add if not pulled by langchain core

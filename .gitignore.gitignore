@@ -1,0 +1,29 @@
+# Environments
+venv/
+.env
+.env.*
+env/
+.direnv/
+
+# Python cache & artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.log
+*.db # If using sqlite for local dev
+
+# IDE / OS files
+.DS_Store
+.idea/
+.vscode/
+
+# Vector DB Data (if local)
+qdrant_storage/
+chroma_db/
+
+# Playwright browsers (if installed locally)
+ms-playwright/

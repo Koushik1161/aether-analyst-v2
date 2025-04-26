@@ -1,0 +1,39 @@
+# tool_services/Dockerfile.process
+# Use a slightly larger base image for potential build tools
+FROM python:3.11
+
+WORKDIR /app
+
+# Install git (needed by some dependencies like sentence-transformers)
+RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first
+COPY ./requirements.txt /app/requirements.txt
+
+# Install dependencies
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Set HF cache directory inside the image build context
+# This helps if models are pre-downloaded during build or cached via volumes
+ENV HF_HOME=/app/.cache/huggingface
+ENV SENTENCE_TRANSFORMERS_HOME=/app/.cache/sentence_transformers
+# Optional: Pre-download model during build (makes image larger but startup faster)
+# RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2', cache_folder=SENTENCE_TRANSFORMERS_HOME)"
+
+# Copy shared utils if they exist
+# COPY ./utils /app/utils
+# COPY ./utils/__init__.py /app/utils/__init__.py
+COPY ./tool_services/__init__.py /app/tool_services/
+
+# Copy the specific service code
+COPY ./tool_services/processing_service.py /app/tool_services/
+
+# Copy the .env file
+COPY ./.env /app/.env
+
+# Expose the port
+EXPOSE 8005
+
+# Run the service (will be overridden by compose)
+# CMD ["uvicorn", "tool_services.processing_service:app", "--host", "0.0.0.0", "--port", "8005"]
