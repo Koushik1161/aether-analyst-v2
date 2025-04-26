@@ -31,18 +31,17 @@ Designed with modularity, scalability, and intelligence at its core, Aether Anal
 
 ```mermaid
 graph TD
-  A[User Query] --> B(LangGraph Agent)
+  A[User Query] --> B[LangGraph Agent]
   B --> C{Decision Point}
-  C --> D1[🔍 Search Service (SerpAPI)]
-  C --> D2[🌐 Scrape Service (Playwright)]
-  C --> D3[🧠 Analyze Service (LLM)]
-  C --> D4[📰 News Service (NewsAPI)]
-  D2 --> E[🗃️ Processing Service (Chunk & Embed)]
-  E --> F[📚 Qdrant Vector Store]
-  F --> G[🧠 Retrieve Relevant Context]
-  G --> H[✍️ Final Synthesis (GPT-4o)]
-  H --> I[📄 Streamlit Report Display]
-```
+  C --> D1[Search Service (SerpAPI)]
+  C --> D2[Scrape Service (Playwright)]
+  C --> D3[Analyze Service (LLM)]
+  C --> D4[News Service (NewsAPI)]
+  D2 --> E[Processing Service (Chunk & Embed)]
+  E --> F[Qdrant Vector Store]
+  F --> G[Retrieve Relevant Context]
+  G --> H[Final Synthesis (GPT-4o)]
+  H --> I[Streamlit Report Display]
 
 ---
 
